@@ -1,0 +1,10 @@
+# ambiente e dados de preparo (grandes ou baixados)
+preparo/.venv/
+preparo/modelos/
+preparo/__pycache__/
+preparo/*.log
+preparo/lista_videos_antiga.json
+preparo/todos_arquivos.json
+preparo/mc.json
+preparo/mlc.csv
+preparo/ufsc.json

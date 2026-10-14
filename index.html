@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mãos que Falam</title>
+<meta name="description" content="Reuniões por vídeo com legenda de Libras para voz e de voz para texto.">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<!-- ================= ENTRADA ================= -->
+<section id="lobby" class="lobby">
+  <div class="card lobby-card">
+    <h1>🤟 Mãos que Falam</h1>
+    <p class="muted">Reunião por vídeo onde <strong>Libras vira legenda e voz</strong>, e <strong>a fala vira legenda</strong> para quem não ouve.</p>
+
+    <label class="campo">Seu nome
+      <input type="text" id="nome" maxlength="40" placeholder="Como os outros vão te ver" autocomplete="name">
+    </label>
+
+    <fieldset class="campo">
+      <legend>Como você vai participar?</legend>
+      <label class="opcao"><input type="radio" name="modo" value="libras"> <span>🤟 <strong>Uso Libras</strong><br><span class="muted">Meus sinais viram legenda e voz para os outros</span></span></label>
+      <label class="opcao"><input type="radio" name="modo" value="voz" checked> <span>🗣️ <strong>Falo</strong><br><span class="muted">Minha fala vira legenda para quem não ouve</span></span></label>
+    </fieldset>
+
+    <div id="entrar-sala" hidden>
+      <button class="primary grande" id="btn-entrar">Entrar na reunião <span id="codigo-convite"></span></button>
+    </div>
+    <div id="criar-sala">
+      <button class="primary grande" id="btn-criar">Criar reunião</button>
+      <div class="ou">ou</div>
+      <div class="row">
+        <input type="text" id="codigo" placeholder="Código da reunião" maxlength="12" autocapitalize="off">
+        <button id="btn-codigo">Entrar</button>
+      </div>
+    </div>
+    <p id="erro-lobby" class="erro" hidden></p>
+    <p class="muted pequeno">Use Chrome ou Edge. Quem fala: use fone de ouvido para a legenda não pegar a voz dos outros.</p>
+  </div>
+</section>
+
+<!-- ================= SALA ================= -->
+<section id="sala" class="sala" hidden>
+  <header class="barra">
+    <strong>🤟 Mãos que Falam</strong>
+    <span class="muted">Reunião <strong id="sala-codigo"></strong></span>
+    <button id="btn-link">🔗 Copiar convite</button>
+    <span class="muted" id="sala-pessoas"></span>
+    <span class="espaco"></span>
+    <button class="danger" id="btn-sair">Sair</button>
+  </header>
+
+  <div class="sala-corpo">
+    <div class="palco">
+      <div id="grade" class="grade"></div>
+
+      <div id="alternativas" class="chips" hidden></div>
+
+      <nav class="controles">
+        <button id="btn-mic" title="Microfone">🎤 Microfone</button>
+        <button id="btn-cam" title="Câmera">📷 Câmera</button>
+        <button id="btn-libras" title="Reconhecer meus sinais">🤟 Libras</button>
+        <button id="btn-legenda" title="Legendar minha fala">💬 Legendar fala</button>
+      </nav>
+      <p id="status" class="muted pequeno centro"></p>
+    </div>
+
+    <aside class="painel">
+      <div class="card" id="cartao-frase" hidden>
+        <h2>Minha frase em Libras</h2>
+        <div id="frase" class="frase"></div>
+        <div class="row" style="margin-bottom:8px">
+          <input type="text" id="adicionar-palavra" placeholder="+ adicionar palavra digitando (Enter)" list="lista-palavras" maxlength="60">
+        </div>
+        <div class="row">
+          <button class="primary" id="btn-enviar">Enviar</button>
+          <button id="btn-desfazer">Apagar última</button>
+          <button id="btn-limpar">Limpar</button>
+        </div>
+        <label class="linha"><input type="checkbox" id="auto-enviar" checked> Enviar sozinho após 3 s parado</label>
+      </div>
+
+      <div class="card transcricao-card">
+        <h2>Conversa</h2>
+        <ol id="transcricao" class="transcricao" aria-live="polite"></ol>
+        <form id="form-chat" class="row">
+          <input type="text" id="chat-texto" placeholder="Escrever mensagem…" maxlength="500" autocomplete="off">
+          <button class="primary">Enviar</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <details>
+          <summary>Ajustes</summary>
+          <label class="linha"><input type="checkbox" id="ler-libras" checked> Falar em voz alta o que for sinalizado em Libras</label>
+          <label class="linha"><input type="checkbox" id="letra-grande"> Legendas com letra bem grande</label>
+          <label class="linha coluna">Palavras que o Libras reconhece
+            <select id="vocabulario">
+              <option value="essencial" selected>Essenciais do dia a dia (acerta mais)</option>
+              <option value="completo">Todas da biblioteca (mais palavras, erra mais)</option>
+            </select>
+          </label>
+          <label class="linha coluna">Voz
+            <select id="voz"></select>
+          </label>
+          <label class="linha coluna">Tolerância do reconhecimento de Libras <span class="muted pequeno">(aumente se não reconhece nada; diminua se inventa palavras)</span>
+            <span class="row"><input type="range" id="tolerancia" min="0.10" max="0.80" step="0.01" value="0.30"><span id="tolerancia-valor">0.30</span></span>
+          </label>
+        </details>
+      </div>
+
+      <div class="card">
+        <details>
+          <summary>Ensinar um sinal</summary>
+          <p class="muted pequeno">Para palavras que não estão na biblioteca ou que ele erra. Ligue 🤟 Libras antes.</p>
+          <div class="row">
+            <input type="text" id="palavra-nova" placeholder="Palavra" maxlength="60" list="lista-palavras">
+            <datalist id="lista-palavras"></datalist>
+          </div>
+          <div class="row">
+            <select id="repeticoes"><option value="1">1 vez</option><option value="3" selected>3 vezes</option><option value="5">5 vezes</option></select>
+            <button class="primary" id="btn-gravar">● Gravar</button>
+          </div>
+          <ul id="meus-sinais" class="meus"></ul>
+          <div class="row">
+            <button id="btn-exportar">Exportar</button>
+            <button id="btn-importar">Importar</button>
+            <input type="file" id="arquivo" accept="application/json" hidden>
+          </div>
+        </details>
+      </div>
+
+      <p class="muted pequeno" id="credito"></p>
+    </aside>
+  </div>
+</section>
+
+<template id="modelo-video">
+  <figure class="video">
+    <video autoplay playsinline></video>
+    <canvas></canvas>
+    <div class="contagem"></div>
+    <div class="aviso" hidden></div>
+    <figcaption class="nome"></figcaption>
+    <div class="legenda" hidden></div>
+  </figure>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
